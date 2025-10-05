@@ -1,3 +1,4 @@
 {
+  "/es/map/page": "app/es/map/page.js",
   "/page": "app/page.js"
 }
