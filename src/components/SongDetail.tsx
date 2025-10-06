@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Star } from "lucide-react";
 import { useState } from "react";
 import { useSongStore } from "@/store/useSongStore";
+import Reviews from "./Reviews";
 
 export default function SongDetail() {
   const {
@@ -13,6 +14,7 @@ export default function SongDetail() {
     comment,
     setComment,
     resetFeedback,
+    addReview, 
   } = useSongStore();
 
   const [hover, setHover] = useState(0);
@@ -29,8 +31,11 @@ export default function SongDetail() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Feedback:", { song: song.title, rating, comment });
-    resetFeedback();
+    if (!comment.trim()) return;
+
+    // Guarda la reseña (solo comentario) asociada a esta canción
+    addReview(song.title, comment.trim());
+    resetFeedback(); // limpia rating y comentario
   };
 
   return (
@@ -89,7 +94,9 @@ export default function SongDetail() {
 
           {/* Comentario */}
           <form onSubmit={onSubmit} className="mt-6 flex items-center gap-4">
+            <label htmlFor="comment" className="sr-only">Comentario</label>
             <input
+              id="comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Deja tu reseña aquí"
@@ -106,6 +113,7 @@ export default function SongDetail() {
       </div>
 
       <hr className="mx-auto mt-10 w-[92%] border-white/10" />
+      <Reviews songKey={song.title} />
     </section>
   );
 }

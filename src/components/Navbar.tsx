@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 const NAV = [
   { name: "Inicio",  href: "/" },
-  { name: "Album",   href: "/album" },
+  { name: "Album",   href: "/albums" },
   { name: "Artista", href: "/artista" },
   { name: "Géneros", href: "/generos" },
   { name: "Mapa",    href: "/mapa" },
