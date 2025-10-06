@@ -17,6 +17,45 @@ type Props = {
 
 type WorldFeature = GeoJSON.FeatureCollection<GeoJSON.MultiPolygon | GeoJSON.Polygon>;
 
+/* ================================
+   NUEVO: idioma simple ES/EN
+==================================*/
+type Lang = 'es' | 'en';
+
+const LABELS: Record<Lang, { mostArtist: string; mostSong: string; close: string; seeDetail: string; }> = {
+  es: {
+    mostArtist: 'Artista más escuchado:',
+    mostSong: 'Canción más escuchada:',
+    close: 'Cerrar tarjeta',
+    seeDetail: 'Ver detalle',
+  },
+  en: {
+    mostArtist: 'Most listened Artist:',
+    mostSong: 'Most listened song:',
+    close: 'Close card',
+    seeDetail: 'See detail',
+  },
+};
+
+// Traducción de países por código ISO-2 (añade los que uses en tu dataset)
+const COUNTRY_NAMES: Record<Lang, Record<string, string>> = {
+  es: {
+    ES: 'España',
+    FR: 'Francia',
+    JP: 'Japón',
+    RU: 'Rusia',
+    US: 'Estados Unidos',
+  },
+  en: {
+    ES: 'Spain',
+    FR: 'France',
+    JP: 'Japan',
+    RU: 'Russia',
+    US: 'United States',
+  },
+};
+/* ================================== */
+
 export default function MusicMap({
   data = HITS,
   initialCenter = [0, 20],
@@ -27,6 +66,10 @@ export default function MusicMap({
 
   const router = useRouter();
   const setCurrentSong = useSongStore(s => s.setCurrentSong);
+
+  // NUEVO: estado de idioma
+  const [lang, setLang] = useState<Lang>('es');
+  const labels = LABELS[lang];
 
   useEffect(() => {
     (async () => {
@@ -45,9 +88,23 @@ export default function MusicMap({
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const goToDetailFromHit = (hit: CountryHit) => {
-  const song = pickSongByTitleArtist(hit.song, hit.artist) ?? SONG_BANK[0]; // fallback
-  setCurrentSong(song);
-  router.push("/songs"); // asegura tener src/app/song/page.tsx que renderiza <SongDetail />
+    const song = pickSongByTitleArtist(hit.song, hit.artist) ?? SONG_BANK[0]; // fallback
+    setCurrentSong(song);
+    router.push("/songs"); // asegura tener src/app/songs/page.tsx
+  };
+
+  // NUEVO: nombre del país según idioma
+  const getCountryName = (hit: CountryHit) => {
+    const iso = hit.code?.toUpperCase();
+    if (iso && COUNTRY_NAMES[lang][iso]) return COUNTRY_NAMES[lang][iso];
+
+    // Fallback por nombre en inglés si no hay code
+    const match = Object.entries(COUNTRY_NAMES.en).find(([, enName]) => enName === hit.country);
+    if (match) {
+      const iso2 = match[0];
+      return COUNTRY_NAMES[lang][iso2] ?? hit.country;
+    }
+    return hit.country;
   };
 
   return (
@@ -61,10 +118,35 @@ export default function MusicMap({
       }}
       aria-label="Contenedor del mapa"
     >
+      {/* NUEVO: Botón de idioma */}
+      <button
+        onClick={() => setLang(prev => (prev === 'es' ? 'en' : 'es'))}
+        aria-label={`Cambiar idioma a ${lang === 'es' ? 'English' : 'Español'}`}
+        style={{
+          position: 'absolute',
+          right: 12,
+          top: 12,
+          zIndex: 10,
+          background: 'rgba(255,255,255,.9)',
+          color: '#111',
+          fontWeight: 700,
+          padding: '6px 10px',
+          borderRadius: 8,
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 2px 10px rgba(0,0,0,.1)'
+        }}
+      >
+        {lang === 'es' ? 'EN' : 'ES'}
+      </button>
+
       <SelectedCard
         hit={selected}
         onClose={() => setSelected(null)}
-        onGo={() => selected && goToDetailFromHit(selected)}   // ← NUEVO
+        onGo={() => selected && goToDetailFromHit(selected)}
+        // NUEVO:
+        countryDisplayName={selected ? getCountryName(selected) : ''}
+        labels={labels}
+        lang={lang}
       />
 
       <svg
@@ -110,7 +192,21 @@ export default function MusicMap({
   );
 }
 
-function SelectedCard({hit, onClose, onGo}:{hit:CountryHit|null; onClose:()=>void; onGo:()=>void}) {
+function SelectedCard({
+  hit,
+  onClose,
+  onGo,
+  countryDisplayName,
+  labels,
+  lang
+}:{
+  hit:CountryHit|null;
+  onClose:()=>void;
+  onGo:()=>void;
+  countryDisplayName: string;
+  labels: { mostArtist: string; mostSong: string; close: string; seeDetail: string };
+  lang: 'es' | 'en';
+}) {
   const outer: React.CSSProperties = {
     pointerEvents: 'none',
     position: 'absolute',
@@ -121,14 +217,14 @@ function SelectedCard({hit, onClose, onGo}:{hit:CountryHit|null; onClose:()=>voi
   };
   const cardWrap: React.CSSProperties = { pointerEvents: 'auto', width: '100%', maxWidth: 960 };
   const cardBase: React.CSSProperties = {
-  borderRadius: 16,
-  boxShadow: '0 6px 20px rgba(0,0,0,.15)',
-  border: '1px solid #d1d5db',
-  background: '#ffffff',       // blanco puro
-  color: '#111111',            // texto oscuro
-  overflow: 'hidden',
-  transition: 'all .2s ease'
-};
+    borderRadius: 16,
+    boxShadow: '0 6px 20px rgba(0,0,0,.15)',
+    border: '1px solid #d1d5db',
+    background: '#ffffff',       // blanco puro
+    color: '#111111',            // texto oscuro
+    overflow: 'hidden',
+    transition: 'all .2s ease'
+  };
 
   const hidden: React.CSSProperties = { opacity: 0, transform: 'translateY(16px)', pointerEvents: 'none' };
   const shown: React.CSSProperties = { opacity: 1, transform: 'translateY(0)' };
@@ -141,16 +237,18 @@ function SelectedCard({hit, onClose, onGo}:{hit:CountryHit|null; onClose:()=>voi
             <div style={{display:'grid', gridTemplateColumns:'1fr 2fr'}}>
               <img
                 src={hit.image}
-                alt={`Imagen de ${hit.country}`}
+                alt={`Imagen de ${countryDisplayName || hit.country}`}
                 style={{width:'100%', height:192, objectFit:'cover'}}
                 loading="lazy"
               />
               <div style={{padding:16}}>
                 <div style={{display:'flex', justifyContent:'space-between', gap:8}}>
-                  <h2 style={{fontSize:20, fontWeight:600, margin:0}}>{hit.country}</h2>
+                  <h2 style={{fontSize:20, fontWeight:600, margin:0}}>
+                    {countryDisplayName || hit.country}
+                  </h2>
                   <button
                     onClick={onClose}
-                    aria-label="Cerrar tarjeta"
+                    aria-label={labels.close}
                     style={{border:'1px solid #e5e7eb', borderRadius:8, padding:'4px 8px', background:'white'}}
                   >
                     ✕
@@ -158,18 +256,18 @@ function SelectedCard({hit, onClose, onGo}:{hit:CountryHit|null; onClose:()=>voi
                 </div>
                 <dl style={{marginTop:8, fontSize:14}}>
                   <div style={{display:'grid', gridTemplateColumns:'1fr 2fr'}}>
-                    <dt style={{fontWeight:500}}>Most listened Artist:</dt>
+                    <dt style={{fontWeight:500}}>{labels.mostArtist}</dt>
                     <dd>{hit.artist}</dd>
                   </div>
                   <div style={{display:'grid', gridTemplateColumns:'1fr 2fr'}}>
-                    <dt style={{fontWeight:500}}>Most listened song:</dt>
+                    <dt style={{fontWeight:500}}>{labels.mostSong}</dt>
                     <dd>{hit.song}</dd>
                   </div>
                 </dl>
-              <div style={{marginTop:12, display:'flex', gap:8}}>
+                <div style={{marginTop:12, display:'flex', gap:8}}>
                   <button
                     onClick={onGo}
-                    aria-label="Ir al detalle de la canción"
+                    aria-label={lang === 'es' ? 'Ir al detalle de la canción' : 'Go to detail'}
                     style={{
                       border:'1px solid #e5e7eb',
                       borderRadius:8,
@@ -179,7 +277,7 @@ function SelectedCard({hit, onClose, onGo}:{hit:CountryHit|null; onClose:()=>voi
                       fontWeight:600
                     }}
                   >
-                    Ver detalle
+                    {labels.seeDetail}
                   </button>
                 </div>
               </div>
