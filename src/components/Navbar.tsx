@@ -12,6 +12,7 @@ const NAV = [
   { name: "Artista", href: "/artista" },
   { name: "Géneros", href: "/generos" },
   { name: "Mapa",    href: "/mapa" },
+  { name: "Recomendaciones",    href: "/recomendaciones" },
 ];
 
 export default function Navbar() {
