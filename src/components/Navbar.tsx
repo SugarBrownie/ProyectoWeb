@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUIStore } from "@/store/useUIStore";
 import { useEffect } from "react";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 const NAV = [
   { name: "Inicio",  href: "/" },
@@ -11,6 +12,7 @@ const NAV = [
   { name: "Artista", href: "/artista" },
   { name: "Géneros", href: "/generos" },
   { name: "Mapa",    href: "/mapa" },
+  { name: "Recomendaciones",    href: "/recomendaciones" },
 ];
 
 export default function Navbar() {
@@ -61,7 +63,7 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-
+        <LanguageSwitcher/ >
         <div className="hidden md:block">
           <Link
             href={buildHref("/ingresar")}
