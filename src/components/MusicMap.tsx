@@ -5,6 +5,9 @@ import {geoEqualEarth, geoPath} from 'd3-geo';
 import {feature} from 'topojson-client';
 import type {Topology} from 'topojson-specification';
 import {HITS, type CountryHit} from '@/data/top-music';
+import { pickSongByTitleArtist, SONG_BANK } from '@/data/song';
+import { useRouter } from 'next/navigation';
+import { useSongStore } from '@/store/useSongStore';
 
 type Props = {
   data?: CountryHit[];
@@ -22,6 +25,9 @@ export default function MusicMap({
   const [world, setWorld] = useState<WorldFeature | null>(null);
   const [selected, setSelected] = useState<CountryHit | null>(null);
 
+  const router = useRouter();
+  const setCurrentSong = useSongStore(s => s.setCurrentSong);
+
   useEffect(() => {
     (async () => {
       const res = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
@@ -38,6 +44,12 @@ export default function MusicMap({
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
+  const goToDetailFromHit = (hit: CountryHit) => {
+  const song = pickSongByTitleArtist(hit.song, hit.artist) ?? SONG_BANK[0]; // fallback
+  setCurrentSong(song);
+  router.push("/songs"); // asegura tener src/app/song/page.tsx que renderiza <SongDetail />
+  };
+
   return (
     <div
       // 🔁 ESTILOS SIN TAILWIND
@@ -49,7 +61,11 @@ export default function MusicMap({
       }}
       aria-label="Contenedor del mapa"
     >
-      <SelectedCard hit={selected} onClose={() => setSelected(null)} />
+      <SelectedCard
+        hit={selected}
+        onClose={() => setSelected(null)}
+        onGo={() => selected && goToDetailFromHit(selected)}   // ← NUEVO
+      />
 
       <svg
         ref={svgRef}
@@ -94,7 +110,7 @@ export default function MusicMap({
   );
 }
 
-function SelectedCard({hit, onClose}:{hit:CountryHit|null; onClose:()=>void}) {
+function SelectedCard({hit, onClose, onGo}:{hit:CountryHit|null; onClose:()=>void; onGo:()=>void}) {
   const outer: React.CSSProperties = {
     pointerEvents: 'none',
     position: 'absolute',
@@ -150,6 +166,22 @@ function SelectedCard({hit, onClose}:{hit:CountryHit|null; onClose:()=>void}) {
                     <dd>{hit.song}</dd>
                   </div>
                 </dl>
+              <div style={{marginTop:12, display:'flex', gap:8}}>
+                  <button
+                    onClick={onGo}
+                    aria-label="Ir al detalle de la canción"
+                    style={{
+                      border:'1px solid #e5e7eb',
+                      borderRadius:8,
+                      padding:'8px 12px',
+                      background:'#111827',
+                      color:'#fff',
+                      fontWeight:600
+                    }}
+                  >
+                    Ver detalle
+                  </button>
+                </div>
               </div>
             </div>
           )}

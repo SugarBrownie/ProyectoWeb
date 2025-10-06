@@ -1,4 +1,6 @@
 {
-  "/page": "app/page.js",
-  "/es/mapa/page": "app/es/mapa/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/songs/page": "app/songs/page.js",
+  "/es/mapa/page": "app/es/mapa/page.js",
+  "/page": "app/page.js"
 }
