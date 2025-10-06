@@ -90,7 +90,7 @@ export default function MusicMap({
   const goToDetailFromHit = (hit: CountryHit) => {
     const song = pickSongByTitleArtist(hit.song, hit.artist) ?? SONG_BANK[0]; // fallback
     setCurrentSong(song);
-    router.push("/songs"); // asegura tener src/app/songs/page.tsx
+    router.push("/es/songs"); // asegura tener src/app/songs/page.tsx
   };
 
   // NUEVO: nombre del país según idioma
