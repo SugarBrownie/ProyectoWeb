@@ -29,7 +29,7 @@ export default function SignUpPage() {
     }
     
     console.log("Account created with:", { Email, Psswd });
-    alert(t('signup.accountCreated'));
+    window.location.replace('/FavSongs');
   };
 
   return (
