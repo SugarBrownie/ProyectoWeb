@@ -1,54 +1,76 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type UserInfo = {
-    Email: string;
-    Psswd: string;
-    Username: string;
-    Bio: string;
-    Image: string;
-    FavArts: String[];
-    FavAlbums: String[];
-  };
+  Email: string;
+  Psswd: string;
+  Username: string;
+  Bio: string;
+  Image: string;
+  FavArts: string[];
+  FavAlbums: string[];
+};
 
-const Context = createContext <{
+type AuthContextType = {
+  User: UserInfo;
 
-    User: UserInfo;
+  Email: string;
+  Psswd: string;
+  Username: string;
+  Bio: string;
+  Image: string;
+  FavArts: string[];
+  FavAlbums: string[];
 
-    Email: string;
-    Psswd: string;
-    Username: string;
-    Bio: string;
-    Image: string;
-    FavArts: String[];
-    FavAlbums: String[];
+  SetEmail: React.Dispatch<React.SetStateAction<string>>;
+  SetPsswd: React.Dispatch<React.SetStateAction<string>>;
+  SetUsername: React.Dispatch<React.SetStateAction<string>>;
+  SetBio: React.Dispatch<React.SetStateAction<string>>;
+  SetImage: React.Dispatch<React.SetStateAction<string>>;
+  SetFavArts: React.Dispatch<React.SetStateAction<string[]>>;
+  SetFavAlbums: React.Dispatch<React.SetStateAction<string[]>>;
+};
 
-} | null>(null)
+const Context = createContext<AuthContextType | null>(null);
 
-export function AuthContextProv({children}: {children: React.ReactNode}) {
-    const [User, SetUser] = useState({Email:"", Psswd:"", Username:"", Bio:"", Image:"", FavArts: [], FavAlbums: []});
+export function AuthContextProv({ children }: { children: React.ReactNode }) {
+  const [Email, SetEmail] = useState("");
+  const [Psswd, SetPsswd] = useState("");
+  const [Username, SetUsername] = useState("");
+  const [Bio, SetBio] = useState("");
+  const [Image, SetImage] = useState("");
+  const [FavArts, SetFavArts] = useState<string[]>([]);
+  const [FavAlbums, SetFavAlbums] = useState<string[]>([]);
 
-    const [Email, SetEmail] = useState("");
-    const [Psswd, SetPsswd] = useState("");
-    const [Username, SetUsername] = useState("");
-    const [Bio, SetBio] = useState("");
-    const [Image, SetImage] = useState("");
-    const [FavArts, SetFavArts] = useState([])
-    const [FavAlbums, SetFavAlbums] = useState([])
+  const User: UserInfo = { Email, Psswd, Username, Bio, Image, FavArts, FavAlbums };
 
-    
-
-    return(
-        <Context.Provider value={{User, Email, Psswd, Username, Bio, Image, FavArts, FavAlbums}}>
-        {children}
-        </Context.Provider>   
-    )
-
-
+  return (
+    <Context.Provider
+      value={{
+        User,
+        Email,
+        Psswd,
+        Username,
+        Bio,
+        Image,
+        FavArts,
+        FavAlbums,
+        SetEmail,
+        SetPsswd,
+        SetUsername,
+        SetBio,
+        SetImage,
+        SetFavArts,
+        SetFavAlbums,
+      }}
+    >
+      {children}
+    </Context.Provider>
+  );
 }
 
 export function useUser() {
-    const ctx = useContext(Context);
-    if (!ctx) throw new Error ("UseUser debe usarse dentro de un provider")
-    return ctx
+  const ctx = useContext(Context);
+  if (!ctx) throw new Error("useUser debe usarse dentro de un provider");
+  return ctx;
 }

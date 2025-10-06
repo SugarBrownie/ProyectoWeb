@@ -9,7 +9,7 @@ export const SONG_BANK: Song[] = [
     genres: ["Pop", "Soft Rock"],
     year: 2017,
     avgRating: 4.9,
-    cover: "/public/ed-divide.png", 
+    cover: "/images/ed-divide.png", 
   },
   {
     title: "Blinding Lights",
@@ -29,7 +29,7 @@ export const SONG_BANK: Song[] = [
     genres: ["Pop"],
     year: 2017,
     avgRating: 4.7,
-    cover: "/images/ed-divide.jpg",
+    cover: "/images/ed-divide.png",
   },
 ];
 
