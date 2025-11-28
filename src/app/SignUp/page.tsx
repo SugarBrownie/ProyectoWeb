@@ -14,7 +14,10 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+
     if (Psswd.length < 8) {
       alert(t('signup.passwordMinLength'));
       return;
@@ -27,10 +30,42 @@ export default function SignUpPage() {
       alert(t('signup.acceptTermsRequired'));
       return;
     }
-    
-    console.log("Account created with:", { Email, Psswd });
-    window.location.replace('/FavSongs');
+
+    try {
+      const response = await fetch('http://localhost:3000/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: Email,    
+          password: Psswd, 
+          bio: "Nuevo usuario", 
+          image: ""             
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        
+        console.log('Usuario registrado:', data);
+        alert(t('signup.success') || 'Cuenta creada con éxito');
+        
+        
+        window.location.replace('/FavSongs');
+      } else {
+        
+        const msg = data.message || 'Error al crear la cuenta';
+        alert(`Error: ${Array.isArray(msg) ? msg.join(', ') : msg}`);
+      }
+
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      alert('Error de conexión con el servidor. Revisa si el backend está corriendo.');
+    }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-slate-900 to-purple-900">
