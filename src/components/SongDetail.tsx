@@ -31,10 +31,13 @@ export default function SongDetail() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim() || !song?.id) return;
+    // Require either a comment or a rating and a valid song id
+    if (!song?.id) return;
+    const trimmed = comment.trim();
+    if (!trimmed && !rating) return;
 
-    // Guarda la reseña en el backend (o local si falla)
-    await addReview(song.id, comment.trim());
+    // Guarda la reseña en el backend (o local si falla), enviando la calificación
+    await addReview(song.id, trimmed, { calificacion: rating });
     resetFeedback(); // limpia rating y comentario
   };
 

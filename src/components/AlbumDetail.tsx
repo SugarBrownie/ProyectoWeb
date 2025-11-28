@@ -29,8 +29,10 @@ export default function AlbumDetail() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim() || !album?.id) return;
-    await addReview(album.id, comment.trim());
+    if (!album?.id) return;
+    const trimmed = comment.trim();
+    if (!trimmed && !rating) return;
+    await addReview(album.id, trimmed, { calificacion: rating });
     resetFeedback();
   };
 
