@@ -32,7 +32,7 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/auth/register', {
+      const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,6 +48,10 @@ export default function SignUpPage() {
       const data = await response.json();
 
       if (response.ok) {
+
+        localStorage.setItem("token", data.access_token);
+        console.log(localStorage.getItem("token"))
+
         
         console.log('Usuario registrado:', data);
         alert(t('signup.success') || 'Cuenta creada con éxito');
