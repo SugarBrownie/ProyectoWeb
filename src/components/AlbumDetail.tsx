@@ -27,10 +27,10 @@ export default function AlbumDetail() {
   if (!album) return <section className="px-4 py-16 text-white/70">Selecciona un álbum para ver el detalle.</section>;
   const stars = [1,2,3,4,5];
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) return;
-    addReview(album.title, comment.trim());
+    if (!comment.trim() || !album?.id) return;
+    await addReview(album.id, comment.trim());
     resetFeedback();
   };
 
@@ -39,7 +39,7 @@ export default function AlbumDetail() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 md:flex-row md:py-16">
         {/* Cover */}
         <div className="relative h-[380px] w-[360px] overflow-hidden rounded-xl ring-1 ring-white/10 shadow-2xl">
-          <Image src={album.cover} alt={`Portada del álbum ${album.title}`} fill className="object-cover" />
+          <Image src={album.cover ?? "/images/playlist1.png"} alt={`Portada del álbum ${album.title ?? "—"}`} fill className="object-cover" />
         </div>
 
         {/* Info */}
@@ -49,12 +49,10 @@ export default function AlbumDetail() {
           </h2>
 
           <ul className="mt-6 space-y-2 text-[15px] leading-7 text-white/90">
-            <li><span className="text-white/60">Artista:</span> <b>{album.artist}</b></li>
-            <li><span className="text-white/60">Número de canciones:</span> <b>{album.n_songs ?? "—"}</b></li>
-            <li><span className="text-white/60">Duración total:</span> <b>{album.duration ?? "—"}</b></li>
-            <li><span className="text-white/60">Género:</span> <b>{album.genres.join(", ")}</b></li>
-            <li><span className="text-white/60">Año de Lanzamiento:</span> <b>{album.year}</b></li>
-            <li><span className="text-white/60">Calificación Promedio:</span> <b>{album.avgRating.toFixed(1)}</b></li>
+            <li><span className="text-white/60">Artista:</span> <b>{album.artist ?? "—"}</b></li>
+            <li><span className="text-white/60">Número de canciones:</span> <b>{album.total_tracks ?? "—"}</b></li>
+            <li><span className="text-white/60">Fecha de lanzamiento:</span> <b>{album.release_date ?? (album.year ? String(album.year) : "—")}</b></li>
+            <li><span className="text-white/60">Calificación Promedio:</span> <b>{album.averageRating !== undefined && album.averageRating !== null ? Number(album.averageRating).toFixed(1) : "—"}</b></li>
           </ul>
 
           {/* Rating */}
@@ -87,7 +85,7 @@ export default function AlbumDetail() {
       </div>
 
       <hr className="mx-auto mt-10 w-[92%] border-white/10" />
-      <ReviewsAlbum albumKey={album.title} />
+      <ReviewsAlbum albumId={album.id} />
     </section>
   );
 }

@@ -1,16 +1,22 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useSongStore } from "@/store/useSongStore";
 
 type Props = {
-  songKey: string; // normalmente el título de la canción
+  songId?: string;
   title?: string;
 };
 
-export default function Reviews({ songKey, title = "RESEÑAS" }: Props) {
-  const { reviewsBySong } = useSongStore();
-  const list = useMemo(() => reviewsBySong[songKey] ?? [], [reviewsBySong, songKey]);
+export default function Reviews({ songId, title = "RESEÑAS" }: Props) {
+  const { reviewsBySong, fetchReviewsForSong } = useSongStore();
+  const list = useMemo(() => (songId ? reviewsBySong[songId] ?? [] : []), [reviewsBySong, songId]);
+
+  // fetch reviews when songId changes
+  useEffect(() => {
+    if (!songId) return;
+    fetchReviewsForSong(songId).catch(() => {});
+  }, [songId]);
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollByCards = (dir: "left" | "right") => {
@@ -52,7 +58,7 @@ export default function Reviews({ songKey, title = "RESEÑAS" }: Props) {
             style={{ scrollBehavior: "smooth" }}
           >
             {list.map((r) => (
-              <ReviewCard key={r.id} author={r.author} role={r.role} avatarUrl={r.avatarUrl} text={r.text} />
+              <ReviewCard key={r.id} author={r.author} role={r.role} avatarUrl={r.avatarUrl} text={(r as any).text ?? (r as any).comentario ?? ""} />
             ))}
           </div>
         )}

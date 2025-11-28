@@ -14,7 +14,7 @@ export default function SongDetail() {
     comment,
     setComment,
     resetFeedback,
-    addReview, 
+    addReview,
   } = useSongStore();
 
   const [hover, setHover] = useState(0);
@@ -29,12 +29,12 @@ export default function SongDetail() {
 
   const stars = [1, 2, 3, 4, 5];
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) return;
+    if (!comment.trim() || !song?.id) return;
 
-    // Guarda la reseña (solo comentario) asociada a esta canción
-    addReview(song.title, comment.trim());
+    // Guarda la reseña en el backend (o local si falla)
+    await addReview(song.id, comment.trim());
     resetFeedback(); // limpia rating y comentario
   };
 
@@ -42,10 +42,10 @@ export default function SongDetail() {
     <section className="w-full">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 md:flex-row md:py-16">
         {/* Imagen */}
-        <div className="relative h-[380px] w-[360px] overflow-hidden rounded-xl ring-1 ring-white/10 shadow-2xl">
+          <div className="relative h-[380px] w-[360px] overflow-hidden rounded-xl ring-1 ring-white/10 shadow-2xl">
           <Image
-            src={song.cover}
-            alt={`Portada del álbum ${song.album}`}
+            src={song?.cover || "/images/playlist1.png"}
+            alt={`Portada de la canción ${song?.title ?? "—"}`}
             fill
             className="object-cover"
           />
@@ -58,12 +58,12 @@ export default function SongDetail() {
           </h2>
 
           <ul className="mt-6 space-y-2 text-[15px] leading-7 text-white/90">
-            <li><span className="text-white/60">Artista:</span> <b>{song.artist}</b></li>
-            <li><span className="text-white/60">Álbum:</span> <b>{song.album}</b></li>
-            <li><span className="text-white/60">Duración:</span> <b>{song.duration}</b></li>
-            <li><span className="text-white/60">Género:</span> <b>{song.genres.join(", ")}</b></li>
-            <li><span className="text-white/60">Año:</span> <b>{song.year}</b></li>
-            <li><span className="text-white/60">Calificación Promedio:</span> <b>{song.avgRating.toFixed(1)}</b></li>
+            <li><span className="text-white/60">Artista:</span> <b>{song.artist ?? "—"}</b></li>
+            <li><span className="text-white/60">Álbum:</span> <b>{song.albumId ?? "—"}</b></li>
+            <li><span className="text-white/60">Duración:</span> <b>{song.duration ? `${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}` : "—"}</b></li>
+            <li><span className="text-white/60">Género:</span> <b>{(song.genres ?? []).join(", ") || "—"}</b></li>
+            <li><span className="text-white/60">Año:</span> <b>{song.year ?? "—"}</b></li>
+            <li><span className="text-white/60">Calificación Promedio:</span> <b>{song.avgRating ? Number(song.avgRating).toFixed(1) : "—"}</b></li>
           </ul>
 
           {/* Rating */}
@@ -113,7 +113,7 @@ export default function SongDetail() {
       </div>
 
       <hr className="mx-auto mt-10 w-[92%] border-white/10" />
-      <Reviews songKey={song.title} />
+      <Reviews songId={song.id} />
     </section>
   );
 }

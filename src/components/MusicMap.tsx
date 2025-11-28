@@ -11,7 +11,7 @@ import { geoEqualEarth, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import type { CountryHit } from '@/data/top-music'; // solo el tipo
-import { pickSongByTitleArtist, SONG_BANK } from '@/data/song';
+import { pickSongByTitleArtist, fetchSongs } from '@/data/song';
 import { useRouter } from 'next/navigation';
 import { useSongStore } from '@/store/useSongStore';
 
@@ -151,11 +151,21 @@ useEffect(() => {
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  const goToDetailFromHit = (hit: CountryHit) => {
-    const song =
-      pickSongByTitleArtist(hit.song, hit.artist) ?? SONG_BANK[0]; // fallback
-    setCurrentSong(song);
-    router.push('/es/songs');
+  const goToDetailFromHit = async (hit: CountryHit) => {
+    try {
+      let song = await pickSongByTitleArtist(hit.song, hit.artist);
+      if (!song) {
+        const list = await fetchSongs();
+        song = Array.isArray(list) && list.length ? list[0] : null;
+      }
+      const fallback = { id: '0', title: hit.song, artist: hit.artist };
+      setCurrentSong(song ?? fallback as any);
+      router.push('/es/songs');
+    } catch (err) {
+      console.error('Error buscando canción desde el mapa', err);
+      setCurrentSong({ id: '0', title: hit.song, artist: hit.artist } as any);
+      router.push('/es/songs');
+    }
   };
 
   const getCountryName = (hit: CountryHit) => {

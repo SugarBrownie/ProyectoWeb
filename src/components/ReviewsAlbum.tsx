@@ -1,12 +1,17 @@
 "use client";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useAlbumStore } from "@/store/useAlbumStore";
 
-export default function ReviewsAlbum({ albumKey, title = "RESEÑAS" }:{
-  albumKey: string; title?: string;
+export default function ReviewsAlbum({ albumId, title = "RESEÑAS" }:{
+  albumId: string; title?: string;
 }) {
-  const { reviewsByAlbum } = useAlbumStore();
-  const list = useMemo(() => reviewsByAlbum[albumKey] ?? [], [reviewsByAlbum, albumKey]);
+  const { reviewsByAlbum, fetchReviewsForAlbum } = useAlbumStore();
+  const list = useMemo(() => reviewsByAlbum[albumId] ?? [], [reviewsByAlbum, albumId]);
+
+  useEffect(() => {
+    if (!albumId) return;
+    fetchReviewsForAlbum(albumId).catch(() => {});
+  }, [albumId]);
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scroll = (dir: "left" | "right") => {
@@ -40,7 +45,7 @@ export default function ReviewsAlbum({ albumKey, title = "RESEÑAS" }:{
                     <div className="text-xs text-white/70">{r.role}</div>
                   </div>
                 </header>
-                <p className="text-[15px] leading-6 text-white/90">{r.text}</p>
+                <p className="text-[15px] leading-6 text-white/90">{(r as any).text ?? (r as any).comentario ?? ""}</p>
               </article>
             ))}
           </div>

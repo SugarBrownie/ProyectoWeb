@@ -2,24 +2,26 @@ import type { Album } from "@/store/useAlbumStore";
 
 export const ALBUM_BANK: Album[] = [
   {
+    id: "ed-divide",
     title: "÷ (Deluxe)",
     artist: "Ed Sheeran",
-    n_songs: 16,
     year: 2017,
-    genres: ["Pop", "Soft Rock"],
-    avgRating: 4.8,
-    cover: "/images/ed-divide.jpg",
-    duration: "59:33",
+    total_tracks: 16,
+    averageRating: 4.8,
+    images: [{ url: "/images/ed-divide.png", height: 640, width: 640 }],
+    release_date: "2017-03-03",
+    cover: "/images/ed-divide.png",
   },
   {
+    id: "after-hours",
     title: "After Hours",
     artist: "The Weeknd",
-    n_songs: 14,
     year: 2020,
-    genres: ["Synth-pop"],
-    avgRating: 4.7,
+    total_tracks: 14,
+    averageRating: 4.7,
+    images: [{ url: "/images/after-hours.jpg", height: 640, width: 640 }],
+    release_date: "2020-03-20",
     cover: "/images/after-hours.jpg",
-    duration: "56:17",
   },
   // agrega más...
 ];
@@ -29,6 +31,6 @@ export function pickAlbumByTitleArtist(title: string, artist: string) {
   const t = title.trim().toLowerCase();
   const a = artist.trim().toLowerCase();
   return ALBUM_BANK.find(
-    (x) => x.title.trim().toLowerCase() === t && x.artist.trim().toLowerCase() === a
+    (x) => x.title.trim().toLowerCase() === t && (x.artist ?? "").trim().toLowerCase() === a
   ) ?? null;
 }
