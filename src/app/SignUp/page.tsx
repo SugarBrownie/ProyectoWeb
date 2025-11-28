@@ -35,8 +35,9 @@ export default function SignUpPage() {
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
+    'Content-Type': 'application/json',
+    'Authorization': Bearer ${API_TOKEN},
+  },
         body: JSON.stringify({
           email: Email,    
           password: Psswd, 
